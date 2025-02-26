@@ -225,37 +225,25 @@ if selected=='Estimate Cost':
 				st.subheader("User Profiles")
 				user_result = view_all_users()
 				clean_db = pd.DataFrame(user_result,columns=["Username","Password"])
-                                st.dataframe(clean_db)
-				 estimate()
-				 
-                         else:
-                                st.warning("Incorrect Admin Username/Password")
-          
-                         
-                        
-
-        elif choice == "USER LOGIN":
-                st.markdown("<h1 style='text-align: center;'>User Login Section</h1>", unsafe_allow_html=True)
-                username = st.sidebar.text_input("User Name")
-                password = st.sidebar.text_input("Password",type='password')
-                if st.sidebar.checkbox("LOGIN"):
-                        # if password == '12345':
-                        create_usertable()
-                        hashed_pswd = make_hashes(password)
-
-                        result = login_user(username,check_hashes(password,hashed_pswd))
-                        if result:
-
-                                st.success("Logged In as {}".format(username))
+				st.dataframe(clean_db)
 				estimate()
-                        else:
-                                st.warning("Incorrect Username/Password")
-                                st.warning("Please Create an Account if not Created")
-
-
-
-
-
+			else:
+				st.warning("Incorrect Admin Username/Password")
+	elif choice == "USER LOGIN":
+		st.markdown("<h1 style='text-align: center;'>User Login Section</h1>", unsafe_allow_html=True)
+		username = st.sidebar.text_input("User Name")
+		password = st.sidebar.text_input("Password",type='password')
+		if st.sidebar.checkbox("LOGIN"):
+			create_usertable()
+			hashed_pswd = make_hashes(password)
+			result = login_user(username,check_hashes(password,hashed_pswd))
+			if result:
+				st.success("Logged In as {}".format(username))
+				estimate()
+			else:
+				st.warning("Incorrect Username/Password")
+				st.warning("Please Create an Account if not Created")
+				
         elif choice == "SIGN UP":
                 st.subheader("Create New Account")
                 new_user = st.text_input("Username")
