@@ -243,20 +243,16 @@ if selected=='Estimate Cost':
 			else:
 				st.warning("Incorrect Username/Password")
 				st.warning("Please Create an Account if not Created")
-				
-        elif choice == "SIGN UP":
-                st.subheader("Create New Account")
-                new_user = st.text_input("Username")
-                new_password = st.text_input("Password",type='password')
-
-                if st.button("SIGN UP"):
-                        create_usertable()
-                        add_userdata(new_user,make_hashes(new_password))
-                        st.success("You have successfully created a valid Account")
-                        st.info("Go to User Login Menu to login")
-
-	estimate()
-
+	elif choice == "SIGN UP":
+		st.subheader("Create New Account")
+		new_user = st.text_input("Username")
+		new_password = st.text_input("Password",type='password')
+		if st.button("SIGN UP"):
+			create_usertable()
+			add_userdata(new_user,make_hashes(new_password))
+			st.success("You have successfully created a valid Account")
+			st.info("Go to User Login Menu to login")
+			
 
 if selected == 'Visualiser':
     #giving a title to the page
