@@ -214,13 +214,12 @@ if selected == 'Home':
 if selected=='Estimate Cost': 
 	st.markdown("<h4 style='text-align: center; color: green;'>Login / Sign up Page</h4>", unsafe_allow_html=True)
 	menu = ["ADMIN LOGIN","USER LOGIN","SIGN UP","ABOUT US"]
-        choice = st.sidebar.selectbox("Menu",menu)
-
-        if choice == "ADMIN LOGIN":
-                 st.markdown("<h1 style='text-align: center;'>Admin Login Section</h1>", unsafe_allow_html=True)
-                 user = st.sidebar.text_input('Username')
-                 passwd = st.sidebar.text_input('Password',type='password')
-                 if st.sidebar.checkbox("LOGIN"):
+	choice = st.sidebar.selectbox("Menu",menu)
+	if choice == "ADMIN LOGIN":
+		st.markdown("<h1 style='text-align: center;'>Admin Login Section</h1>", unsafe_allow_html=True)
+		user = st.sidebar.text_input('Username')
+		passwd = st.sidebar.text_input('Password',type='password')
+                if st.sidebar.checkbox("LOGIN"):
 
                          if user == "Admin" and passwd == 'admin123':
 				 st.success("Logged In as {}".format(user))
