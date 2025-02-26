@@ -219,14 +219,13 @@ if selected=='Estimate Cost':
 		st.markdown("<h1 style='text-align: center;'>Admin Login Section</h1>", unsafe_allow_html=True)
 		user = st.sidebar.text_input('Username')
 		passwd = st.sidebar.text_input('Password',type='password')
-                if st.sidebar.checkbox("LOGIN"):
-
-                         if user == "Admin" and passwd == 'admin123':
-				 st.success("Logged In as {}".format(user))
-                                 st.subheader("User Profiles")
-                                 user_result = view_all_users()
-                                 clean_db = pd.DataFrame(user_result,columns=["Username","Password"])
-                                 st.dataframe(clean_db)
+		if st.sidebar.checkbox("LOGIN"):
+			if user == "Admin" and passwd == 'admin123':
+				st.success("Logged In as {}".format(user))
+				st.subheader("User Profiles")
+				user_result = view_all_users()
+				clean_db = pd.DataFrame(user_result,columns=["Username","Password"])
+                                st.dataframe(clean_db)
 				 estimate()
 				 
                          else:
