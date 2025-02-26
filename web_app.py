@@ -2,9 +2,128 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
+from PIL import Image
 import pickle
 import streamlit as st
 from streamlit_option_menu import option_menu
+import time
+
+# Security
+#passlib,hashlib,bcrypt,scrypt
+import hashlib
+def make_hashes(password):
+        return hashlib.sha256(str.encode(password)).hexdigest()
+
+def check_hashes(password,hashed_text):
+        if make_hashes(password) == hashed_text:
+                return hashed_text
+        return False
+
+# DB Management
+import sqlite3 
+conn = sqlite3.connect('data.db')
+c = conn.cursor()
+# DB  Functions
+def create_usertable():
+        c.execute('CREATE TABLE IF NOT EXISTS userstable(username TEXT,password TEXT)')
+
+
+def add_userdata(username,password):
+        c.execute('INSERT INTO userstable(username,password) VALUES (?,?)',(username,password))
+        conn.commit()
+
+def login_user(username,password):
+        c.execute('SELECT * FROM userstable WHERE username =? AND password = ?',(username,password))
+        data = c.fetchall()
+        return data
+
+
+def view_all_users():
+        c.execute('SELECT * FROM userstable')
+        data = c.fetchall()
+        return data
+
+def estimate():
+    #giving a title to the page
+    st.title('House Price Prediction System')
+
+    #getting the input data from the user
+    district = st.selectbox("Select a District", list(district_data.keys()))
+    if district:
+        area = district_data[district]
+        st.write(f"The area code of {district} is {area}")
+								
+    # Getting the input data from the user
+    area = st.text_input('Area of the house')
+    bedrooms = st.text_input('Number of Bedrooms')
+    bathrooms = st.text_input('Number of Bathrooms')
+    stories = st.text_input('Number of Storey')
+    mainroad = st.text_input('Is there a Mainroad? (0 or 1)')
+    guestroom = st.text_input('Is there a Guestroom? (0 or 1)')
+    basement = st.text_input('Is there a Basement? (0 or 1)')
+    hotwaterheating = st.text_input('Is there hot water heating? (0 or 1)')
+    airconditioning = st.text_input('Is there air conditioning? (0 or 1)')
+    parking = st.text_input('Number of parking spaces')
+    prefarea = st.text_input('Is there a preferred area? (0 or 1)')
+    
+    sclarea = st.text_input('School / College nearby (0 or 1)')
+    furnishingstatus = st.text_input('Furnishing status (unfurnished-0, semi-furnished-1, or furnished-2)')
+
+    # Initialize session state for price and hiddenPrice
+    if 'price' not in st.session_state:
+        st.session_state.price = 0
+    if 'hiddenPrice' not in st.session_state:
+        st.session_state.hiddenPrice = 0
+
+    #creating a button
+    if st.button('Predict the price of the house'):
+        try:
+            area = int(area)
+            bedrooms = int(bedrooms)
+            bathrooms = int(bathrooms)
+            stories = int(stories)
+            mainroad = int(mainroad)
+            guestroom = int(guestroom)
+            basement = int(basement)
+            hotwaterheating = int(hotwaterheating)
+            airconditioning = int(airconditioning)
+            parking = int(parking)
+            prefarea = int(prefarea)
+            furnishingstatus = int(furnishingstatus)
+            st.session_state.price = house_price_prediction([area,bedrooms,bathrooms,stories,mainroad,guestroom,basement,hotwaterheating,airconditioning,parking,prefarea,furnishingstatus])
+            st.success(f'The price of the house is: {st.session_state.price}')
+        except ValueError:
+            st.error("Please enter valid numerical values for all inputs.")
+
+    st.divider()
+
+    st.subheader('Hidden Costs while buying the house')
+    transferFee = st.text_input(" 1 Society Transfer Fee (Cost that goes to society fund)")
+    maintainance = st.text_input(" 2 Maintainance Cost (per year)")
+    homeInsurance = st.text_input(" 3 Home Insurance (Basic - 3000, Comprehensive - 5000, Premium - 10000")
+    propertyTax = st.text_input(" 4 Property Tax (Enter 20.4 for residential & 34.68 for Commercial)")
+    brokerFee = st.text_input(" 5 Brokerage")
+    st.text(" 6 Sales Deed (Price * 0.06)")
+
+    hiddenPrice = 0
+
+    if st.button('Calculate the hidden costs'):
+        try:
+            transferFee = int(transferFee)
+            maintainance = int(maintainance)
+            homeInsurance = int(homeInsurance)
+            st.session_state.price = house_price_prediction([area,bedrooms,bathrooms,stories,mainroad,guestroom,basement,hotwaterheating,airconditioning,parking,prefarea,furnishingstatus])
+            salesDeed = st.session_state.price * 0.06
+            propertyTax = float(propertyTax)
+            propertyTax = float(area) * propertyTax
+            brokerFee = int(brokerFee)
+            st.session_state.hiddenPrice = hidden_price_prediction([transferFee,maintainance,homeInsurance,salesDeed,propertyTax,brokerFee,st.session_state.price])
+            st.success(f'The initial cost of the house: {st.session_state.price}')
+            st.success(f'The final cost of the house in a year is: {st.session_state.hiddenPrice}')
+        except ValueError:
+            st.error("Please enter valid numerical values for all inputs.")
+
+
 
 # Set the page config
 st.set_page_config(page_title='House Price Prediction System')
@@ -92,85 +211,68 @@ if selected == 'Home':
     """
     )
 
-if selected == 'Estimate Cost':
-    #giving a title to the page
-    st.title('House Price Prediction System')
+if selected=='Estimate Cost': 
+	st.markdown("<h4 style='text-align: center; color: green;'>Login / Sign up Page</h4>", unsafe_allow_html=True)
+        menu = ["ADMIN LOGIN","USER LOGIN","SIGN UP","ABOUT US"]
+        choice = st.sidebar.selectbox("Menu",menu)
 
-    #getting the input data from the user
-    district = st.selectbox("Select a District", list(district_data.keys()))
-    if district:
-        area = district_data[district]
-        st.write(f"The area code of {district} is {area}")
-								
-    # Getting the input data from the user
-    area = st.text_input('Area of the house')
-    bedrooms = st.text_input('Number of Bedrooms')
-    bathrooms = st.text_input('Number of Bathrooms')
-    stories = st.text_input('Number of Storey')
-    mainroad = st.text_input('Is there a Mainroad? (0 or 1)')
-    guestroom = st.text_input('Is there a Guestroom? (0 or 1)')
-    basement = st.text_input('Is there a Basement? (0 or 1)')
-    hotwaterheating = st.text_input('Is there hot water heating? (0 or 1)')
-    airconditioning = st.text_input('Is there air conditioning? (0 or 1)')
-    parking = st.text_input('Number of parking spaces')
-    prefarea = st.text_input('Is there a preferred area? (0 or 1)')
-    
-    sclarea = st.text_input('School / College nearby (0 or 1)')
-    furnishingstatus = st.text_input('Furnishing status (unfurnished-0, semi-furnished-1, or furnished-2)')
 
-    # Initialize session state for price and hiddenPrice
-    if 'price' not in st.session_state:
-        st.session_state.price = 0
-    if 'hiddenPrice' not in st.session_state:
-        st.session_state.hiddenPrice = 0
 
-    #creating a button
-    if st.button('Predict the price of the house'):
-        try:
-            area = int(area)
-            bedrooms = int(bedrooms)
-            bathrooms = int(bathrooms)
-            stories = int(stories)
-            mainroad = int(mainroad)
-            guestroom = int(guestroom)
-            basement = int(basement)
-            hotwaterheating = int(hotwaterheating)
-            airconditioning = int(airconditioning)
-            parking = int(parking)
-            prefarea = int(prefarea)
-            furnishingstatus = int(furnishingstatus)
-            st.session_state.price = house_price_prediction([area,bedrooms,bathrooms,stories,mainroad,guestroom,basement,hotwaterheating,airconditioning,parking,prefarea,furnishingstatus])
-            st.success(f'The price of the house is: {st.session_state.price}')
-        except ValueError:
-            st.error("Please enter valid numerical values for all inputs.")
+        if choice == "ADMIN LOGIN":
+                 st.markdown("<h1 style='text-align: center;'>Admin Login Section</h1>", unsafe_allow_html=True)
+                 user = st.sidebar.text_input('Username')
+                 passwd = st.sidebar.text_input('Password',type='password')
+                 if st.sidebar.checkbox("LOGIN"):
 
-    st.divider()
+                         if user == "Admin" and passwd == 'admin123':
+				 st.success("Logged In as {}".format(user))
+                                 st.subheader("User Profiles")
+                                 user_result = view_all_users()
+                                 clean_db = pd.DataFrame(user_result,columns=["Username","Password"])
+                                 st.dataframe(clean_db)
+				 estimate()
+				 
+                         else:
+                                st.warning("Incorrect Admin Username/Password")
+          
+                         
+                        
 
-    st.subheader('Hidden Costs while buying the house')
-    transferFee = st.text_input(" 1 Society Transfer Fee (Cost that goes to society fund)")
-    maintainance = st.text_input(" 2 Maintainance Cost (per year)")
-    homeInsurance = st.text_input(" 3 Home Insurance (Basic - 3000, Comprehensive - 5000, Premium - 10000")
-    propertyTax = st.text_input(" 4 Property Tax (Enter 20.4 for residential & 34.68 for Commercial)")
-    brokerFee = st.text_input(" 5 Brokerage")
-    st.text(" 6 Sales Deed (Price * 0.06)")
+        elif choice == "USER LOGIN":
+                st.markdown("<h1 style='text-align: center;'>User Login Section</h1>", unsafe_allow_html=True)
+                username = st.sidebar.text_input("User Name")
+                password = st.sidebar.text_input("Password",type='password')
+                if st.sidebar.checkbox("LOGIN"):
+                        # if password == '12345':
+                        create_usertable()
+                        hashed_pswd = make_hashes(password)
 
-    hiddenPrice = 0
+                        result = login_user(username,check_hashes(password,hashed_pswd))
+                        if result:
 
-    if st.button('Calculate the hidden costs'):
-        try:
-            transferFee = int(transferFee)
-            maintainance = int(maintainance)
-            homeInsurance = int(homeInsurance)
-            st.session_state.price = house_price_prediction([area,bedrooms,bathrooms,stories,mainroad,guestroom,basement,hotwaterheating,airconditioning,parking,prefarea,furnishingstatus])
-            salesDeed = st.session_state.price * 0.06
-            propertyTax = float(propertyTax)
-            propertyTax = float(area) * propertyTax
-            brokerFee = int(brokerFee)
-            st.session_state.hiddenPrice = hidden_price_prediction([transferFee,maintainance,homeInsurance,salesDeed,propertyTax,brokerFee,st.session_state.price])
-            st.success(f'The initial cost of the house: {st.session_state.price}')
-            st.success(f'The final cost of the house in a year is: {st.session_state.hiddenPrice}')
-        except ValueError:
-            st.error("Please enter valid numerical values for all inputs.")
+                                st.success("Logged In as {}".format(username))
+				estimate()
+                        else:
+                                st.warning("Incorrect Username/Password")
+                                st.warning("Please Create an Account if not Created")
+
+
+
+
+
+        elif choice == "SIGN UP":
+                st.subheader("Create New Account")
+                new_user = st.text_input("Username")
+                new_password = st.text_input("Password",type='password')
+
+                if st.button("SIGN UP"):
+                        create_usertable()
+                        add_userdata(new_user,make_hashes(new_password))
+                        st.success("You have successfully created a valid Account")
+                        st.info("Go to User Login Menu to login")
+
+	estimate()
+
 
 if selected == 'Visualiser':
     #giving a title to the page
